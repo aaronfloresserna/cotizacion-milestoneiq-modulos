@@ -1,0 +1,592 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cotización operativa · Módulos MilestoneIQ</title>
+<meta name="description" content="Costo operacional mensual estimado de tres módulos adicionales sobre la plataforma MilestoneIQ: validación de etapa con IA, directorio de expertos con agenda e indicadores de startups." />
+<link rel="icon" href="favicon.svg" type="image/svg+xml" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..800;1,9..144,300..800&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --paper: #f6f4ee;
+    --paper-2: #efece3;
+    --ink: #0d1226;
+    --ink-2: #3a4160;
+    --ink-3: #6b7290;
+    --line: #d8d4c8;
+    --blue: #2563eb;
+    --blue-deep: #2b50e0;
+    --blue-sky: #41a8e0;
+    --blue-ink: #0f1f55;
+    --mint: #0f8a6a;
+    --amber: #b86e00;
+    --card: #fffdf8;
+    --shadow: 0 1px 0 rgba(13,18,38,.06), 0 18px 40px -24px rgba(13,18,38,.35);
+    --display: "Fraunces", Georgia, serif;
+    --body: "Instrument Sans", "Helvetica Neue", sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font-family: var(--body); font-size: 17px; line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    background-image:
+      linear-gradient(to right, rgba(13,18,38,.045) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(13,18,38,.045) 1px, transparent 1px);
+    background-size: 56px 56px;
+  }
+  a { color: var(--blue-deep); }
+  .wrap { width: min(1160px, 100% - 32px); margin-inline: auto; }
+  .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+  /* ---------- hero ---------- */
+  header.hero {
+    background: var(--ink); color: var(--paper);
+    position: relative; overflow: hidden;
+    padding: clamp(40px, 7vw, 96px) 0 clamp(48px, 6vw, 80px);
+  }
+  header.hero::before {
+    content: ""; position: absolute; inset: -40% -20% auto auto; width: 70vw; height: 70vw; max-width: 900px; max-height: 900px;
+    background: radial-gradient(closest-side, rgba(65,168,224,.35), rgba(37,99,235,.18) 45%, transparent 70%);
+    filter: blur(10px); pointer-events: none;
+  }
+  header.hero::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .5;
+    background-image: linear-gradient(to right, rgba(255,255,255,.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,.05) 1px, transparent 1px);
+    background-size: 56px 56px;
+  }
+  .hero .wrap { position: relative; z-index: 1; }
+  .kicker { display: flex; align-items: center; gap: 14px; font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: #a9b4d8; }
+  .kicker svg { width: 34px; height: 28px; }
+  .kicker .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--blue-sky); }
+  h1 {
+    font-family: var(--display); font-weight: 400; font-optical-sizing: auto;
+    font-size: clamp(38px, 6vw, 76px); line-height: .98; letter-spacing: -.02em;
+    margin: 26px 0 18px; max-width: 14ch;
+  }
+  h1 em { font-style: italic; font-weight: 300; color: #9fc4ff; }
+  .lede { max-width: 58ch; color: #c7cde6; font-size: clamp(16px, 1.4vw, 19px); margin: 0; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 10px 28px; margin-top: 36px; font-size: 14px; color: #a9b4d8; }
+  .hero-meta b { color: var(--paper); font-weight: 500; }
+
+  /* ---------- totals bar ---------- */
+  .totals { position: sticky; top: 0; z-index: 20; background: var(--card); border-bottom: 1px solid var(--line); box-shadow: 0 10px 30px -22px rgba(13,18,38,.4); }
+  .totals .wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 40px; align-items: start; padding: 14px 0; }
+  .totals .tot { display: grid; gap: 6px; }
+  .totals .tot.dev { border-left: 1px solid var(--line); padding-left: 40px; }
+  .totals .tot.dev .sum { color: var(--blue-deep); }
+  .totals .label { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); }
+  .totals .sum { font-family: var(--display); font-size: clamp(28px, 3.4vw, 42px); line-height: 1; letter-spacing: -.02em; }
+  .totals .sum small { font-family: var(--body); font-size: 14px; color: var(--ink-3); letter-spacing: 0; margin-left: 6px; }
+  .totals .breakdown { display: flex; gap: 18px; flex-wrap: wrap; font-size: 13px; color: var(--ink-2); }
+  .totals .breakdown span b { font-weight: 600; color: var(--ink); }
+  .totals .breakdown span.off { opacity: .4; text-decoration: line-through; }
+
+  /* ---------- controls ---------- */
+  section { padding: clamp(40px, 6vw, 80px) 0; }
+  .controls { background: var(--paper-2); border-block: 1px solid var(--line); }
+  .controls .wrap { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 22px 32px; }
+  .ctl legend, .ctl .lg { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 10px; display: block; }
+  .ctl fieldset { border: 0; padding: 0; margin: 0; }
+  .seg { display: inline-flex; border: 1px solid var(--ink); border-radius: 999px; padding: 3px; background: var(--card); }
+  .seg label { position: relative; cursor: pointer; }
+  .seg input { position: absolute; opacity: 0; inset: 0; }
+  .seg span { display: block; padding: 7px 14px; border-radius: 999px; font-size: 14px; font-weight: 500; color: var(--ink-2); transition: background .2s, color .2s; }
+  .seg input:checked + span { background: var(--ink); color: var(--paper); }
+  .seg input:focus-visible + span { outline: 2px solid var(--blue); outline-offset: 2px; }
+  .range { display: grid; gap: 6px; }
+  .range output { font-family: var(--mono); font-size: 14px; color: var(--ink-2); }
+  input[type=range] { width: 100%; accent-color: var(--blue); }
+  .hint { font-size: 13px; color: var(--ink-3); margin: 6px 0 0; }
+
+  /* ---------- modules ---------- */
+  .modules .wrap { display: grid; gap: 28px; }
+  .section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-bottom: 8px; }
+  h2 { font-family: var(--display); font-weight: 400; font-size: clamp(28px, 3.4vw, 44px); letter-spacing: -.02em; line-height: 1.05; margin: 0; }
+  h2 em { font-style: italic; font-weight: 300; color: var(--blue-deep); }
+  .section-head p { margin: 0; color: var(--ink-3); max-width: 46ch; }
+
+  .mod {
+    background: var(--card); border: 1px solid var(--line); border-radius: 18px; box-shadow: var(--shadow);
+    display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(300px, .95fr); overflow: hidden;
+    transition: opacity .25s, transform .25s;
+    animation: rise .7s cubic-bezier(.2,.7,.2,1) both;
+  }
+  .mod:nth-child(2) { animation-delay: .08s; } .mod:nth-child(3) { animation-delay: .16s; } .mod:nth-child(4) { animation-delay: .24s; }
+  @keyframes rise { from { opacity: 0; transform: translateY(14px); } }
+  .mod.off { opacity: .55; }
+  .mod .body { padding: clamp(22px, 3vw, 36px); border-right: 1px solid var(--line); }
+  .mod .num { font-family: var(--mono); font-size: 13px; color: var(--blue-deep); letter-spacing: .1em; }
+  .mod h3 { font-family: var(--display); font-weight: 500; font-size: clamp(24px, 2.6vw, 32px); letter-spacing: -.015em; line-height: 1.1; margin: 8px 0 12px; }
+  .mod .desc { color: var(--ink-2); margin: 0 0 18px; }
+  .mod ul.req { margin: 0 0 18px; padding: 0; list-style: none; display: grid; gap: 6px; font-size: 15px; color: var(--ink-2); }
+  .mod ul.req li { padding-left: 20px; position: relative; }
+  .mod ul.req li::before { content: ""; position: absolute; left: 0; top: .55em; width: 10px; height: 2px; background: var(--blue); }
+  .mod .how { font-size: 14.5px; color: var(--ink-2); border-left: 3px solid var(--blue-sky); padding: 6px 0 6px 14px; margin: 0; }
+  .mod .how b { color: var(--ink); font-weight: 600; }
+
+  .mod .price { padding: clamp(22px, 3vw, 36px); background: linear-gradient(180deg, #fbfaf6, var(--card)); display: flex; flex-direction: column; gap: 18px; }
+  .include { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 500; color: var(--ink-2); cursor: pointer; }
+  .include input { width: 18px; height: 18px; accent-color: var(--blue); }
+  .big { font-family: var(--display); font-size: clamp(40px, 4.6vw, 58px); line-height: 1; letter-spacing: -.03em; }
+  .big small { font-family: var(--body); font-size: 15px; letter-spacing: 0; color: var(--ink-3); margin-left: 6px; }
+  .tag { display: inline-block; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; padding: 4px 10px; border-radius: 999px; background: #e9efff; color: var(--blue-ink); font-weight: 600; }
+  .tag.var { background: #fff1dd; color: var(--amber); }
+  .tag.fix { background: #e3f5ee; color: var(--mint); }
+  table.lines { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+  table.lines th { text-align: left; font-weight: 500; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); padding: 0 0 8px; border-bottom: 1px solid var(--line); }
+  table.lines th:last-child, table.lines td:last-child { text-align: right; }
+  table.lines td { padding: 9px 0; border-bottom: 1px dashed var(--line); vertical-align: top; color: var(--ink-2); }
+  table.lines td:first-child { padding-right: 14px; }
+  table.lines td .u { display: block; font-size: 12.5px; color: var(--ink-3); font-family: var(--mono); margin-top: 2px; }
+  table.lines tr.sum td { border-bottom: 0; font-weight: 600; color: var(--ink); padding-top: 12px; }
+  .opts { display: grid; gap: 10px; }
+  .opt { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: start; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--card); cursor: pointer; font-size: 14.5px; }
+  .opt:has(input:checked) { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,.12); }
+  .opt input { margin-top: 3px; accent-color: var(--blue); }
+  .opt b { display: block; font-weight: 600; }
+  .opt span.d { color: var(--ink-3); font-size: 13.5px; }
+  .opt .p { font-family: var(--mono); font-weight: 600; white-space: nowrap; }
+  .toggle { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 14.5px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; cursor: pointer; }
+  .toggle input { accent-color: var(--blue); width: 18px; height: 18px; }
+  .toggle .p { font-family: var(--mono); font-weight: 600; }
+
+  /* ---------- development ---------- */
+  .dev-section { background: var(--paper-2); border-block: 1px solid var(--line); }
+  .dev-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; margin-top: 28px; }
+  .dev-card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 24px; box-shadow: var(--shadow); display: grid; gap: 14px; align-content: start; }
+  .dev-card .num { font-family: var(--mono); font-size: 12px; color: var(--blue-deep); letter-spacing: .1em; }
+  .dev-card h3 { font-family: var(--display); font-weight: 500; font-size: 22px; margin: 0; letter-spacing: -.01em; }
+  .dev-card .hrs { font-family: var(--display); font-size: 40px; line-height: 1; letter-spacing: -.03em; }
+  .dev-card .hrs small { font-family: var(--body); font-size: 14px; color: var(--ink-3); letter-spacing: 0; margin-left: 6px; }
+  .dev-card .cost { font-family: var(--mono); font-weight: 600; color: var(--blue-deep); font-size: 18px; }
+  .dev-card table.lines td:last-child { white-space: nowrap; }
+  .dev-card .weeks { font-size: 13.5px; color: var(--ink-3); }
+  .dev-total { margin-top: 26px; display: flex; flex-wrap: wrap; gap: 12px 36px; align-items: baseline; border-top: 1px solid var(--ink); padding-top: 18px; }
+  .dev-total .big { font-size: clamp(34px, 4vw, 48px); }
+  .dev-total p { margin: 0; color: var(--ink-2); font-size: 15px; max-width: 60ch; }
+
+  /* ---------- notes ---------- */
+  .notes { background: var(--ink); color: #d7dcf0; }
+  .notes h2 { color: var(--paper); }
+  .notes h2 em { color: #9fc4ff; }
+  .notes .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 28px 40px; margin-top: 32px; }
+  .notes h4 { font-family: var(--display); font-weight: 500; font-size: 20px; margin: 0 0 10px; color: var(--paper); }
+  .notes p, .notes li { font-size: 15px; color: #b7bfdc; margin: 0; }
+  .notes ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+  .notes .rec { border: 1px solid rgba(255,255,255,.14); border-radius: 16px; padding: 22px 24px; background: rgba(255,255,255,.04); }
+  .notes .rec .big { color: var(--paper); font-size: 34px; }
+  .rec-list { display: grid; gap: 8px; margin-top: 10px; }
+  .rec-list div { display: flex; justify-content: space-between; gap: 12px; font-size: 14.5px; border-bottom: 1px dashed rgba(255,255,255,.14); padding-bottom: 8px; }
+  .rec-list div span:last-child { font-family: var(--mono); color: var(--paper); }
+
+  footer { padding: 34px 0 56px; font-size: 13px; color: var(--ink-3); }
+  footer .wrap { display: grid; gap: 10px; }
+  footer a { color: var(--ink-2); }
+
+  @media (max-width: 860px) {
+    .mod { grid-template-columns: 1fr; }
+    .mod .body { border-right: 0; border-bottom: 1px solid var(--line); }
+    .totals .wrap { grid-template-columns: 1fr; gap: 10px; }
+    .totals .tot.dev { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); padding-top: 10px; }
+    .dev-grid { grid-template-columns: 1fr; }
+  }
+  @media (prefers-reduced-motion: reduce) { .mod { animation: none; } html { scroll-behavior: auto; } }
+  @media print {
+    .totals { position: static; box-shadow: none; }
+    .controls { display: none; }
+    body { background: #fff; }
+    .mod { break-inside: avoid; box-shadow: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="kicker">
+      <svg viewBox="0 0 100 80" aria-hidden="true"><defs><linearGradient id="g" x1="0" y1="80" x2="100" y2="0" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#2b50e0"/><stop offset=".55" stop-color="#2563eb"/><stop offset="1" stop-color="#41a8e0"/></linearGradient></defs><g fill="none" stroke="url(#g)" stroke-width="5" stroke-linecap="round"><path d="M14 66 L30 14 L50 50 L70 14 L86 66"/></g><g fill="#0d1226" stroke="url(#g)" stroke-width="5"><circle cx="14" cy="66" r="6"/><circle cx="30" cy="14" r="6"/><circle cx="50" cy="50" r="6"/><circle cx="70" cy="14" r="6"/><circle cx="86" cy="66" r="6"/></g></svg>
+      <span>MilestoneIQ</span><span class="dot"></span><span>Cotización operativa</span>
+    </div>
+    <h1>Tres módulos nuevos, <em>un costo mensual</em> por cada uno.</h1>
+    <p class="lede">Estimación del costo de integrar a la plataforma MilestoneIQ la validación de etapa con IA, el directorio de expertos con agenda y los indicadores de startups: la operación mensual (infraestructura y servicios) y el desarrollo de cada módulo como costo único. Ajusta el escenario y la selección; los totales se recalculan.</p>
+    <div class="hero-meta">
+      <span>Moneda <b>USD, sin IVA</b></span>
+      <span>Fecha <b>octubre 2026</b></span>
+      <span>Alcance <b>operación mensual</b> + <b>desarrollo único</b> a $25 USD/h</span>
+    </div>
+  </div>
+</header>
+
+<div class="totals" aria-live="polite">
+  <div class="wrap">
+    <div class="tot">
+      <div class="label">Operación mensual · módulos seleccionados</div>
+      <div class="sum"><span id="total" class="mono">$0</span><small>USD / mes</small></div>
+      <div class="breakdown">
+        <span id="bk1">Módulo 1 <b>$0</b></span>
+        <span id="bk2">Módulo 2 <b>$0</b></span>
+        <span id="bk3">Módulo 3 <b>$0</b></span>
+        <span id="bkdb">Base de datos <b>$0</b></span>
+      </div>
+    </div>
+    <div class="tot dev">
+      <div class="label">Desarrollo · costo único a $25 USD/h</div>
+      <div class="sum"><span id="devTotal" class="mono">$0</span><small><span id="devHours">0</span> h</small></div>
+      <div class="breakdown">
+        <span id="dk1">Módulo 1 <b>0 h</b></span>
+        <span id="dk2">Módulo 2 <b>0 h</b></span>
+        <span id="dk3">Módulo 3 <b>0 h</b></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="controls" aria-label="Escenario">
+  <div class="wrap">
+    <div class="ctl">
+      <fieldset>
+        <legend>Volumen de startups</legend>
+        <div class="seg" role="radiogroup">
+          <label><input type="radio" name="vol" value="70" checked /><span>Base · 70/mes</span></label>
+          <label><input type="radio" name="vol" value="150" /><span>Alto · 150/mes</span></label>
+        </div>
+      </fieldset>
+      <p class="hint">Base = ~15–20 emprendimientos por semana, el volumen de la plataforma hoy.</p>
+    </div>
+    <div class="ctl">
+      <fieldset>
+        <legend>Modelo de IA (módulo 1)</legend>
+        <div class="seg" role="radiogroup">
+          <label><input type="radio" name="model" value="opus" checked /><span>Claude Opus 5.5</span></label>
+          <label><input type="radio" name="model" value="sonnet" /><span>Claude Sonnet 5.5</span></label>
+        </div>
+      </fieldset>
+      <p class="hint">Opus: $4 / $20 por millón de tokens. Sonnet: $2 / $10. Recomendado Opus por la calidad del juicio sobre documentos.</p>
+    </div>
+    <div class="ctl">
+      <span class="lg">Expertos con calendario conectado (módulo 2)</span>
+      <div class="range">
+        <input id="experts" type="range" min="5" max="80" step="5" value="30" aria-describedby="expertsOut" />
+        <output id="expertsOut" for="experts">30 expertos</output>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="modules">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Desglose <em>por módulo</em></h2>
+      <p>Cada módulo se puede contratar por separado. Los montos fijos son infraestructura; los variables escalan con el uso.</p>
+    </div>
+
+    <!-- MÓDULO 1 -->
+    <article class="mod" id="mod1">
+      <div class="body">
+        <div class="num">MÓDULO 01</div>
+        <h3>Validación de etapa con IA</h3>
+        <p class="desc">La startup sube sus entregables por etapa (análisis financiero, plan comercial, estrategia de marketing) y la IA verifica que la información sea coherente y respalde la etapa que declaró en el cuestionario.</p>
+        <ul class="req">
+          <li>Espacios por etapa para subir Excel, PDF y PowerPoint</li>
+          <li>Ejemplos de entregables descargables</li>
+          <li>Validación automática de coherencia y sentido de la información</li>
+          <li>Veredicto de etapa combinando respuestas y archivos</li>
+        </ul>
+        <p class="how"><b>Cómo se construye.</b> PDF lo lee Claude de forma nativa; Excel se parsea con la librería que ya usa la plataforma; PowerPoint con un extractor de texto. Los archivos viven en S3 con URLs firmadas, igual que los exports actuales. Sin servicios adicionales de AWS.</p>
+      </div>
+      <div class="price">
+        <label class="include"><input type="checkbox" data-include="1" checked /> Incluir en la cotización</label>
+        <div><span class="tag var">Costo variable</span></div>
+        <div class="big"><span id="p1" class="mono">$0</span><small>USD / mes</small></div>
+        <table class="lines">
+          <thead><tr><th>Concepto</th><th>Mensual</th></tr></thead>
+          <tbody>
+            <tr><td>IA · validación completa por etapa<span class="u" id="u1a"></span></td><td class="mono" id="l1a"></td></tr>
+            <tr><td>IA · pre-chequeo de cada archivo al subirlo<span class="u" id="u1b"></span></td><td class="mono" id="l1b"></td></tr>
+            <tr><td>Cómputo extra (Fargate 0.5 vCPU / 1 GB para parsear archivos)<span class="u">fijo</span></td><td class="mono" id="l1c"></td></tr>
+            <tr><td>S3, transferencia y antivirus de archivos<span class="u">casi fijo</span></td><td class="mono" id="l1d"></td></tr>
+          </tbody>
+        </table>
+        <label class="toggle"><span>Pre-chequeo inmediato por archivo (“¿esto es un plan comercial?”)</span><input type="checkbox" id="precheck" checked /></label>
+      </div>
+    </article>
+
+    <!-- MÓDULO 2 -->
+    <article class="mod" id="mod2">
+      <div class="body">
+        <div class="num">MÓDULO 02</div>
+        <h3>Directorio de expertos con agenda</h3>
+        <p class="desc">Perfil de cada experto con área de expertise y disponibilidad real tomada de su calendario; la startup agenda horas de asesoría desde la plataforma y el equipo ve el conteo de horas por experto.</p>
+        <ul class="req">
+          <li>Directorio con información, expertise y disponibilidad</li>
+          <li>Conteo de horas agendadas por experto</li>
+          <li>Página pública por experto para promover sus servicios</li>
+        </ul>
+        <p class="how"><b>Cómo se construye.</b> El directorio, las reservas y el reporte de horas viven en la base de datos actual. La conexión al calendario tiene dos caminos; la elección depende de qué calendarios usan los expertos.</p>
+      </div>
+      <div class="price">
+        <label class="include"><input type="checkbox" data-include="2" checked /> Incluir en la cotización</label>
+        <div><span class="tag fix">Costo fijo por experto</span></div>
+        <div class="big"><span id="p2" class="mono">$0</span><small>USD / mes</small></div>
+        <div class="opts" role="radiogroup" aria-label="Integración de calendario">
+          <label class="opt"><input type="radio" name="cal" value="direct" /><span><b>A · Integración directa</b><span class="d">Google Calendar y Microsoft Graph con OAuth por experto. Sin licencias; más desarrollo.</span></span><span class="p" id="o2a"></span></label>
+          <label class="opt"><input type="radio" name="cal" value="nylas" checked /><span><b>B · Nylas (Calendar only)</b><span class="d">API unificada para Google, Outlook e iCloud. $10 base con 5 cuentas + ~$1.25 por experto adicional.</span></span><span class="p" id="o2b"></span></label>
+        </div>
+        <p class="hint">Descartados para este volumen: Cal.com ($12–15 por asiento) y Cronofy API (desde $819/mes).</p>
+      </div>
+    </article>
+
+    <!-- MÓDULO 3 -->
+    <article class="mod" id="mod3">
+      <div class="body">
+        <div class="num">MÓDULO 03</div>
+        <h3>Indicadores de startups</h3>
+        <p class="desc">Cada empresa captura periódicamente datos de su maduración y obtiene un dashboard propio con la evolución en el tiempo.</p>
+        <ul class="req">
+          <li>Históricos de ventas y ticket promedio</li>
+          <li>Contacto, organigrama, valuación y tipo de funding</li>
+          <li>Estadísticas y dashboard personalizado por empresa</li>
+        </ul>
+        <p class="how"><b>Cómo se construye.</b> Series de tiempo en la base de datos actual y gráficas con la misma librería del spider de resultados. El volumen de datos es mínimo (cientos de startups × meses × ~10 métricas), por lo que no requiere servicios nuevos.</p>
+      </div>
+      <div class="price">
+        <label class="include"><input type="checkbox" data-include="3" checked /> Incluir en la cotización</label>
+        <div><span class="tag fix">Costo fijo</span></div>
+        <div class="big"><span id="p3" class="mono">$0</span><small>USD / mes</small></div>
+        <table class="lines">
+          <thead><tr><th>Concepto</th><th>Mensual</th></tr></thead>
+          <tbody>
+            <tr><td>Almacenamiento, cómputo marginal y S3 para organigramas<span class="u">fijo</span></td><td class="mono" id="l3a"></td></tr>
+            <tr><td>Opcional · resumen con IA por empresa cada mes<span class="u" id="u3b"></span></td><td class="mono" id="l3b"></td></tr>
+          </tbody>
+        </table>
+        <label class="toggle"><span>Incluir insights mensuales con IA por empresa</span><input type="checkbox" id="insights" /></label>
+      </div>
+    </article>
+  </div>
+</section>
+
+<section class="dev-section" id="desarrollo">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Desarrollo e <em>implementación</em></h2>
+      <p>Costo único por módulo a $25 USD por hora. Incluye backend, frontend bilingüe, pruebas, infraestructura y despliegue a producción.</p>
+    </div>
+    <div class="dev-grid">
+      <div class="dev-card">
+        <div class="num">MÓDULO 01</div>
+        <h3>Validación de etapa con IA</h3>
+        <div class="hrs"><span id="h1" class="mono">0</span><small>horas</small></div>
+        <div class="cost" id="c1"></div>
+        <table class="lines">
+          <tbody>
+            <tr><td>Backend: carga por etapa a S3, parseo de Excel/PDF/PPT, worker de validación, veredictos, ejemplos descargables</td><td class="mono">80 h</td></tr>
+            <tr><td>Frontend: espacios de entrega por etapa, veredicto en resultados, consola admin, ES/EN</td><td class="mono">55 h</td></tr>
+            <tr><td>Rúbricas por etapa, set de evaluación y calibración con entregables reales</td><td class="mono">25 h</td></tr>
+            <tr><td>Infraestructura, seguridad de archivos, QA y despliegue</td><td class="mono">20 h</td></tr>
+          </tbody>
+        </table>
+        <div class="weeks">≈ 5–6 semanas de calendario</div>
+      </div>
+      <div class="dev-card">
+        <div class="num">MÓDULO 02</div>
+        <h3>Directorio de expertos con agenda</h3>
+        <div class="hrs"><span id="h2" class="mono">0</span><small>horas</small></div>
+        <div class="cost" id="c2"></div>
+        <table class="lines">
+          <tbody>
+            <tr><td>Backend: expertos, áreas, reservas, reporte de horas, notificaciones por correo</td><td class="mono">35 h</td></tr>
+            <tr><td>Conexión de calendario (disponibilidad, creación de eventos, cancelaciones)<span class="u" id="u2cal"></span></td><td class="mono" id="hcal"></td></tr>
+            <tr><td>Frontend: directorio con filtros, perfil, agendado, mis asesorías, admin y página pública por experto</td><td class="mono">55 h</td></tr>
+            <tr><td>Infraestructura, QA y despliegue</td><td class="mono">15 h</td></tr>
+          </tbody>
+        </table>
+        <div class="weeks" id="w2">≈ 4 semanas de calendario</div>
+      </div>
+      <div class="dev-card">
+        <div class="num">MÓDULO 03</div>
+        <h3>Indicadores de startups</h3>
+        <div class="hrs"><span id="h3" class="mono">0</span><small>horas</small></div>
+        <div class="cost" id="c3"></div>
+        <table class="lines">
+          <tbody>
+            <tr><td>Backend: modelo de métricas periódicas, organigrama, agregaciones, vistas admin por startup y cohorte</td><td class="mono">40 h</td></tr>
+            <tr><td>Frontend: captura periódica, dashboard por empresa con gráficas de evolución, admin</td><td class="mono">45 h</td></tr>
+            <tr><td>Opcional · insights mensuales con IA<span class="u" id="u3ins"></span></td><td class="mono" id="hins"></td></tr>
+            <tr><td>Infraestructura, QA y despliegue</td><td class="mono">10 h</td></tr>
+          </tbody>
+        </table>
+        <div class="weeks">≈ 3 semanas de calendario</div>
+      </div>
+    </div>
+    <div class="dev-total">
+      <div class="big"><span id="devTotal2" class="mono">$0</span><small>USD · <span id="devHours2">0</span> h · módulos seleccionados</small></div>
+      <p>Las semanas son de calendario con un equipo de desarrollo dedicado; los módulos pueden construirse en paralelo o en secuencia según el orden que elija el Tec. El costo único no se repite.</p>
+    </div>
+  </div>
+</section>
+
+<section class="notes">
+  <div class="wrap">
+    <h2>Supuestos y <em>lectura</em> de la cotización</h2>
+    <div class="grid">
+      <div>
+        <h4>Qué incluye</h4>
+        <ul>
+          <li>Infraestructura AWS en us-east-1 a precio de lista (Fargate ARM, S3, RDS) y uso de la API de Claude.</li>
+          <li>Licencias de terceros cuando aplica (Nylas).</li>
+          <li>Desarrollo e implementación de cada módulo como costo único a $25 USD/h, con horas desglosadas por módulo.</li>
+          <li>Cuando operan los tres módulos, se prevé subir la base de datos a db.t4g.small (+$12/mes); se suma automáticamente.</li>
+        </ul>
+      </div>
+      <div>
+        <h4>Qué no incluye</h4>
+        <ul>
+          <li>Horas de mantenimiento y soporte mensual posteriores a la entrega.</li>
+          <li>IVA y tipo de cambio. Los montos son en USD.</li>
+          <li>La infraestructura base actual de MilestoneIQ (~$80–100/mes), que ya opera.</li>
+        </ul>
+      </div>
+      <div>
+        <h4>Supuestos del módulo 1</h4>
+        <ul>
+          <li>Tres entregables por startup y ~30% de resubidas.</li>
+          <li>Un PDF o PPT de 15–20 páginas pesa ~40–50 mil tokens. La validación completa de una etapa consume ~120 mil tokens de entrada y ~12 mil de salida.</li>
+          <li>Es el único módulo con costo variable real; conviene cotizarlo con banda base/alto o con un tope de validaciones incluidas.</li>
+        </ul>
+      </div>
+      <div class="rec">
+        <h4>Si se empieza con uno</h4>
+        <p>Comparativo con el escenario seleccionado:</p>
+        <div class="rec-list">
+          <div><span>Módulo 3 · el más barato de operar y el más rápido de construir</span><span id="r3"></span></div>
+          <div><span>Módulo 2 · costo fijo y predecible por experto</span><span id="r2"></span></div>
+          <div><span>Módulo 1 · el de mayor valor, con costo variable</span><span id="r1"></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>Precios AWS tomados del Price List API (octubre 2026): Fargate ARM $0.03238 por vCPU-hora, S3 Standard $0.023 por GB-mes, RDS PostgreSQL db.t4g.micro $0.016/h y db.t4g.small $0.032/h. API de Claude: tarifas públicas de Opus 5.5 y Sonnet 5.5.</div>
+    <div>Referencias de calendario: <a href="https://nylas.com/pricing/" rel="noopener">Nylas</a> · <a href="https://www.schedulingkit.com/pricing-guides/cal-com-pricing" rel="noopener">Cal.com</a> · <a href="https://www.cronofy.com/pricing" rel="noopener">Cronofy</a>. Verificar antes de firmar: los precios de terceros cambian.</div>
+    <div>Estimación preliminar para cotización. Los montos reales dependerán del uso.</div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  const $ = (s) => document.querySelector(s);
+  const money = (n) => "$" + Math.round(n).toLocaleString("en-US");
+  const PRICE = {
+    opus:   { val: 0.75, file: 0.28, insight: 0.08 },
+    sonnet: { val: 0.375, file: 0.14, insight: 0.04 },
+  };
+  const ACTIVE_STARTUPS = 180;
+  const RATE = 25; // USD por hora de desarrollo
+
+  function calc() {
+    const startups = +document.querySelector('input[name="vol"]:checked').value;
+    const model = document.querySelector('input[name="model"]:checked').value;
+    const experts = +$("#experts").value;
+    const precheck = $("#precheck").checked;
+    const insights = $("#insights").checked;
+    const cal = document.querySelector('input[name="cal"]:checked').value;
+    const inc = { 1: $('[data-include="1"]').checked, 2: $('[data-include="2"]').checked, 3: $('[data-include="3"]').checked };
+    const p = PRICE[model];
+
+    // Módulo 1
+    const validations = Math.round(startups * 1.3);
+    const files = Math.round(startups * 3 * 1.3);
+    const l1a = validations * p.val;
+    const l1b = precheck ? files * p.file : 0;
+    const l1c = 15;
+    const l1d = 2.2 + 0.04 * startups;
+    const m1 = l1a + l1b + l1c + l1d;
+    $("#u1a").textContent = `${validations} validaciones × ${money2(p.val)}`;
+    $("#u1b").textContent = precheck ? `${files} archivos × ${money2(p.file)}` : "desactivado";
+    $("#l1a").textContent = money(l1a);
+    $("#l1b").textContent = precheck ? money(l1b) : "—";
+    $("#l1c").textContent = money(l1c);
+    $("#l1d").textContent = money(l1d);
+    $("#p1").textContent = money(m1);
+
+    // Módulo 2
+    const o2a = 8;
+    const o2b = 10 + Math.max(0, experts - 5) * 1.25;
+    const m2 = cal === "direct" ? o2a : o2b;
+    $("#o2a").textContent = money(o2a);
+    $("#o2b").textContent = money(o2b);
+    $("#p2").textContent = money(m2);
+    $("#expertsOut").textContent = `${experts} expertos`;
+
+    // Módulo 3
+    const l3a = 12;
+    const l3b = insights ? ACTIVE_STARTUPS * p.insight : 0;
+    const m3 = l3a + l3b;
+    $("#l3a").textContent = money(l3a);
+    $("#l3b").textContent = insights ? money(l3b) : "—";
+    $("#u3b").textContent = insights ? `${ACTIVE_STARTUPS} startups activas × ${money2(p.insight)}` : "desactivado";
+    $("#p3").textContent = money(m3);
+
+    // Totales
+    const db = inc[1] && inc[2] && inc[3] ? 12 : 0;
+    const total = (inc[1] ? m1 : 0) + (inc[2] ? m2 : 0) + (inc[3] ? m3 : 0) + db;
+    $("#total").textContent = money(total);
+    setBk("#bk1", "Módulo 1", m1, inc[1]);
+    setBk("#bk2", "Módulo 2", m2, inc[2]);
+    setBk("#bk3", "Módulo 3", m3, inc[3]);
+    setBk("#bkdb", "Base de datos", db, db > 0);
+    [1, 2, 3].forEach((i) => $("#mod" + i).classList.toggle("off", !inc[i]));
+
+    // Desarrollo (costo único)
+    const hcal = cal === "direct" ? 55 : 30;
+    const hins = insights ? 15 : 0;
+    const h1 = 80 + 55 + 25 + 20;
+    const h2 = 35 + hcal + 55 + 15;
+    const h3 = 40 + 45 + hins + 10;
+    $("#h1").textContent = h1; $("#h2").textContent = h2; $("#h3").textContent = h3;
+    $("#c1").textContent = money(h1 * RATE) + " USD"; $("#c2").textContent = money(h2 * RATE) + " USD"; $("#c3").textContent = money(h3 * RATE) + " USD";
+    $("#hcal").textContent = hcal + " h";
+    $("#u2cal").textContent = cal === "direct" ? "Google Calendar + Microsoft Graph, OAuth propio" : "vía Nylas, API unificada";
+    $("#w2").textContent = cal === "direct" ? "≈ 5 semanas de calendario" : "≈ 4 semanas de calendario";
+    $("#hins").textContent = insights ? hins + " h" : "—";
+    $("#u3ins").textContent = insights ? "incluido" : "no incluido";
+    const devH = (inc[1] ? h1 : 0) + (inc[2] ? h2 : 0) + (inc[3] ? h3 : 0);
+    const devUSD = devH * RATE;
+    $("#devTotal").textContent = money(devUSD); $("#devTotal2").textContent = money(devUSD);
+    $("#devHours").textContent = devH; $("#devHours2").textContent = devH;
+    setBkText("#dk1", "Módulo 1", h1 + " h", inc[1]);
+    setBkText("#dk2", "Módulo 2", h2 + " h", inc[2]);
+    setBkText("#dk3", "Módulo 3", h3 + " h", inc[3]);
+
+    $("#r1").textContent = money(m1) + "/mes · " + money(h1 * RATE) + " único";
+    $("#r2").textContent = money(m2) + "/mes · " + money(h2 * RATE) + " único";
+    $("#r3").textContent = money(m3) + "/mes · " + money(h3 * RATE) + " único";
+  }
+  function setBkText(sel, label, txt, on) {
+    const el = $(sel);
+    el.innerHTML = `${label} <b>${txt}</b>`;
+    el.classList.toggle("off", !on);
+  }
+  function money2(n) { return "$" + n.toFixed(2); }
+  function setBk(sel, label, v, on) {
+    const el = $(sel);
+    el.innerHTML = `${label} <b>${money(v)}</b>`;
+    el.classList.toggle("off", !on);
+  }
+  document.querySelectorAll("input").forEach((i) => i.addEventListener("input", calc));
+  calc();
+})();
+</script>
+</body>
+</html>
